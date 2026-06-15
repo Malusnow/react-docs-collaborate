@@ -18,6 +18,7 @@ import { Color } from '@tiptap/extension-color'
 import Highlight from '@tiptap/extension-highlight'
 import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
+import { FontSizeExtension } from "@/extensions/font-size";
 
 export const Editor = () => {
   const { setEditor } = useEditorStore();
@@ -87,6 +88,7 @@ export const Editor = () => {
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
+      FontSizeExtension,
     ],
     content: `<h1>Welcome to Docs Collaborate!</h1>`,
   });
