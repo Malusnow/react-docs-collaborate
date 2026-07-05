@@ -8,11 +8,25 @@ import {
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
 import { templates } from "@/constants/template";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { api } from "../../../convex/_generated/api";
+import { useMutation } from "convex/react";
 
 export const TemplatesGallery = () => {
-  const isCreating = false;
+  const router = useRouter();
+  //或许可以用react-query实现？
+  const create = useMutation(api.documents.create);
+  const [isCreating, setIsCreating] = useState(false);
+  
   const onTemplateClick = (title: string, initialContent: string) => {
-    // Implementation for handling template click
+    setIsCreating(true);
+    create({ title, initialContent }).then((docId) => {
+      router.push(`/documents/${docId}`);
+    })
+    .finally(() => {
+      setIsCreating(false);
+    })
   };
 
   return (

@@ -1,8 +1,10 @@
-export default {
+const authConfig = {
   providers: [
     {
       domain: "https://thorough-pegasus-13.clerk.accounts.dev",
       applicationID: "convex",
-    },
+    }
   ]
-} satisfies AuthConfig;
+};
+
+export default authConfig;
