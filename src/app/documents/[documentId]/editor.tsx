@@ -3,21 +3,21 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import { useEditorStore } from "@/store/useEditorStore";
 import StarterKit from "@tiptap/starter-kit";
-import TaskItem from '@tiptap/extension-task-item'
-import TaskList from '@tiptap/extension-task-list'
-import Table from '@tiptap/extension-table'
-import TableCell from '@tiptap/extension-table-cell'
-import TableHeader from '@tiptap/extension-table-header'
-import TableRow from '@tiptap/extension-table-row'
-import Image from '@tiptap/extension-image'
-import ImageResize from 'tiptap-extension-resize-image'
-import Underline from '@tiptap/extension-underline'
-import TextStyle from '@tiptap/extension-text-style'
-import FontFamily from '@tiptap/extension-font-family'
-import { Color } from '@tiptap/extension-color'
-import Highlight from '@tiptap/extension-highlight'
-import Link from '@tiptap/extension-link'
-import TextAlign from '@tiptap/extension-text-align'
+import TaskItem from "@tiptap/extension-task-item";
+import TaskList from "@tiptap/extension-task-list";
+import Table from "@tiptap/extension-table";
+import TableCell from "@tiptap/extension-table-cell";
+import TableHeader from "@tiptap/extension-table-header";
+import TableRow from "@tiptap/extension-table-row";
+import Image from "@tiptap/extension-image";
+import ImageResize from "tiptap-extension-resize-image";
+import Underline from "@tiptap/extension-underline";
+import TextStyle from "@tiptap/extension-text-style";
+import FontFamily from "@tiptap/extension-font-family";
+import { Color } from "@tiptap/extension-color";
+import Highlight from "@tiptap/extension-highlight";
+import Link from "@tiptap/extension-link";
+import TextAlign from "@tiptap/extension-text-align";
 import { FontSizeExtension } from "@/extensions/font-size";
 import { LineHeightExtension } from "@/extensions/line-height";
 import { Ruler } from "./ruler";
@@ -54,7 +54,7 @@ export const Editor = () => {
     editorProps: {
       attributes: {
         // inside style for the editor content
-        style: "padding-left: 56px; padding-right: 56px;", 
+        style: "padding-left: 56px; padding-right: 56px;",
         // outside style for the editor container
         class:
           "focus:outline-none print:border-0 bg-white border border-[#C7C7C7] flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text",
@@ -66,7 +66,7 @@ export const Editor = () => {
       TaskList,
       TaskItem.configure({
         nested: true, // Allow nested task lists
-      }), 
+      }),
       // Configure the Table extension to be resizable
       Table.configure({
         resizable: true,
@@ -86,14 +86,14 @@ export const Editor = () => {
       Link.configure({
         openOnClick: false, // Disable opening links on click
         autolink: true, // Automatically convert URLs into links
-        defaultProtocol: 'https', // Use https as the default protocol for links
+        defaultProtocol: "https", // Use https as the default protocol for links
       }),
       TextAlign.configure({
-        types: ['heading', 'paragraph'],
+        types: ["heading", "paragraph"],
       }),
       FontSizeExtension,
       LineHeightExtension.configure({
-        types: ['paragraph', 'heading'],
+        types: ["paragraph", "heading"],
         defaultLineHeight: "normal",
       }),
     ],

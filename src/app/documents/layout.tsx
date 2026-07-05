@@ -3,11 +3,7 @@ interface DocumentIdPageProps {
 }
 
 const DocumentsLayout = ({ children }: DocumentIdPageProps) => {
-    return(
-        <div className="flex flex-col">
-            {children}
-        </div>
-    )
-}
+  return <div className="flex flex-col">{children}</div>;
+};
 
 export default DocumentsLayout;

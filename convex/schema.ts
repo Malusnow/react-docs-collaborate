@@ -12,7 +12,7 @@ export default defineSchema({
     .index("byOwnerId", ["ownerId"])
     .index("byOrganizationId", ["organizationId"])
     .searchIndex("searchTitle", {
-        searchField: "title",
-        filterFields: ["ownerId", "organizationId"]
+      searchField: "title",
+      filterFields: ["ownerId", "organizationId"],
     }),
 });

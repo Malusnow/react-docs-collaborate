@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
   Carousel,
   CarouselContent,
@@ -18,15 +18,16 @@ export const TemplatesGallery = () => {
   //或许可以用react-query实现？
   const create = useMutation(api.documents.create);
   const [isCreating, setIsCreating] = useState(false);
-  
+
   const onTemplateClick = (title: string, initialContent: string) => {
     setIsCreating(true);
-    create({ title, initialContent }).then((docId) => {
-      router.push(`/documents/${docId}`);
-    })
-    .finally(() => {
-      setIsCreating(false);
-    })
+    create({ title, initialContent })
+      .then((docId) => {
+        router.push(`/documents/${docId}`);
+      })
+      .finally(() => {
+        setIsCreating(false);
+      });
   };
 
   return (
@@ -43,12 +44,14 @@ export const TemplatesGallery = () => {
                 <div
                   className={cn(
                     "aspect-[3/4] flex flex-col gap-y-2.5",
-                    isCreating && "pointer-events-none opacity-50"
+                    isCreating && "pointer-events-none opacity-50",
                   )}
                 >
                   <button
                     disabled={isCreating}
-                    onClick={() => onTemplateClick(template.label, template.initialContent)}
+                    onClick={() =>
+                      onTemplateClick(template.label, template.initialContent)
+                    }
                     style={{
                       backgroundImage: `url(${template.imageUrl})`,
                       backgroundSize: "cover",

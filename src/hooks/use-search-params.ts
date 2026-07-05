@@ -5,4 +5,4 @@ export function useSearchParam() {
     "search",
     parseAsString.withDefault("").withOptions({ clearOnDefault: true }),
   );
-};
+}

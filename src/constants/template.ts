@@ -1,13 +1,13 @@
 export const templates = [
-  { 
-    id: "blank", 
-    label: "Blank Document", 
+  {
+    id: "blank",
+    label: "Blank Document",
     imageUrl: "/blank-document.svg",
     initialContent: "",
   },
-  { 
-    id: "software-proposal", 
-    label: "Software development proposal", 
+  {
+    id: "software-proposal",
+    label: "Software development proposal",
     imageUrl: "/software-proposal.svg",
     initialContent: `
       <h1>Software Development Proposal</h1>
@@ -22,11 +22,11 @@ export const templates = [
       
       <h2>Budget</h2>
       <p>Cost breakdown and payment terms.</p>
-    `
+    `,
   },
-  { 
-    id: "project-proposal", 
-    label: "Project proposal", 
+  {
+    id: "project-proposal",
+    label: "Project proposal",
     imageUrl: "/project-proposal.svg",
     initialContent: `
       <h1>Project Proposal</h1>
@@ -43,18 +43,18 @@ export const templates = [
       <p>Team, equipment, and budget requirements.</p>
     `,
   },
-  { 
-    id: "business-letter", 
-    label: "Business letter", 
+  {
+    id: "business-letter",
+    label: "Business letter",
     imageUrl: "/business-letter.svg",
     initialContent: `
       <h1>Business Letter</h1>
       <p>This is a business letter template.</p>
     `,
   },
-  { 
-    id: "resume", 
-    label: "Resume", 
+  {
+    id: "resume",
+    label: "Resume",
     imageUrl: "/resume.svg",
     initialContent: `
       <h1>[Your Name]</h1>
@@ -75,9 +75,9 @@ export const templates = [
       <p>List of relevant skills and competencies.</p>
     `,
   },
-  { 
-    id: "cover-letter", 
-    label: "Cover letter", 
+  {
+    id: "cover-letter",
+    label: "Cover letter",
     imageUrl: "/cover-letter.svg",
     initialContent: `
       <p>[Your Name]<br>
@@ -98,9 +98,9 @@ export const templates = [
       [Your Name]</p>
     `,
   },
-  { 
-    id: "letter", 
-    label: "Letter", 
+  {
+    id: "letter",
+    label: "Letter",
     imageUrl: "/letter.svg",
     initialContent: `
       <p>Subject: [Email Subject]</p>

@@ -4,7 +4,6 @@ import { FaCaretDown } from "react-icons/fa";
 const markers = Array.from({ length: 83 }, (_, i) => i);
 
 export const Ruler = () => {
-
   const [leftMargin, setLeftMargin] = useState(56);
   const [rightMargin, setRightMargin] = useState(56);
   const [isDraggingLeft, setIsDraggingLeft] = useState(false);
@@ -37,12 +36,15 @@ export const Ruler = () => {
         } else if (isDraggingRight) {
           const maxRightPosition = PAGE_WIDTH - (leftMargin + MINIMUM_SPACE);
           const newRightPosition = Math.max(PAGE_WIDTH - rawPosition, 0);
-          const constrainedRightPosition = Math.min(newRightPosition, maxRightPosition);
+          const constrainedRightPosition = Math.min(
+            newRightPosition,
+            maxRightPosition,
+          );
           setRightMargin(constrainedRightPosition);
         }
       }
     }
-  }
+  };
 
   const handleMouseUp = () => {
     setIsDraggingLeft(false);
@@ -63,11 +65,9 @@ export const Ruler = () => {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
-      className="w-[816px] mx-auto h-6 border-b border-gray-300 flex items-end relative select-none print:hidden">
-      <div
-        id="ruler-container"
-        className="w-full h-full relative"
-      >
+      className="w-[816px] mx-auto h-6 border-b border-gray-300 flex items-end relative select-none print:hidden"
+    >
+      <div id="ruler-container" className="w-full h-full relative">
         <Marker
           position={leftMargin}
           isLeft={true}
@@ -108,7 +108,7 @@ export const Ruler = () => {
                     <div className="absolute bottom-0 w-[1px] h-1 bg-neutral-500" />
                   )}
                 </div>
-              )
+              );
             })}
           </div>
         </div>
@@ -123,7 +123,7 @@ interface MarkerProps {
   isDragging: boolean;
   onMouseDown: () => void;
   onDoubleClick: () => void;
-};
+}
 
 const Marker = ({
   position,
