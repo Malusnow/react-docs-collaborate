@@ -13,7 +13,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 import { api } from "../../convex/_generated/api";
@@ -22,19 +21,21 @@ import { useRouter } from "next/navigation";
 
 interface RemoveDialogProps {
   documentId: Id<"documents">;
-  children: React.ReactNode;
-};
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
 
-export const RemoveDialog = ({ documentId, children }: RemoveDialogProps) => {
+export const RemoveDialog = ({
+  documentId,
+  open,
+  onOpenChange,
+}: RemoveDialogProps) => {
   const router = useRouter();
   const remove = useMutation(api.documents.removeById);
   const [isRemoving, setIsRemoving] = useState(false);
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        {children}
-      </AlertDialogTrigger>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent onClick={(e) => e.stopPropagation()}>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -58,7 +59,10 @@ export const RemoveDialog = ({ documentId, children }: RemoveDialogProps) => {
                   toast.success("Document removed");
                   router.push("/");
                 })
-                .finally(() => setIsRemoving(false));
+                .finally(() => {
+                  setIsRemoving(false);
+                  onOpenChange(false);
+                });
             }}
           >
             Delete

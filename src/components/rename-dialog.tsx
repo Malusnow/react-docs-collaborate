@@ -11,7 +11,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
@@ -21,15 +20,20 @@ import { Id } from "../../convex/_generated/dataModel";
 interface RenameDialogProps {
   documentId: Id<"documents">;
   initialTitle: string;
-  children: React.ReactNode;
-};
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
 
-export const RenameDialog = ({ documentId, initialTitle, children }: RenameDialogProps) => {
+export const RenameDialog = ({
+  documentId,
+  initialTitle,
+  open,
+  onOpenChange,
+}: RenameDialogProps) => {
   const update = useMutation(api.documents.updateById);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const [title, setTitle] = useState(initialTitle);
-  const [open, setOpen] = useState(false);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,15 +44,12 @@ export const RenameDialog = ({ documentId, initialTitle, children }: RenameDialo
       .then(() => toast.success("Document updated"))
       .finally(() => {
         setIsUpdating(false);
-        setOpen(false);
+        onOpenChange(false);
       });
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent onClick={(e) => e.stopPropagation()}>
         <form onSubmit={onSubmit}>
           <DialogHeader>
@@ -72,7 +73,7 @@ export const RenameDialog = ({ documentId, initialTitle, children }: RenameDialo
               disabled={isUpdating}
               onClick={(e) => {
                 e.stopPropagation();
-                setOpen(false);
+                onOpenChange(false);
               }}
             >
               Cancel
