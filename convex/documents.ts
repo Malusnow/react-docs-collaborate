@@ -2,7 +2,6 @@ import { ConvexError, v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 
 import { mutation, query } from "./_generated/server";
-import { Search } from "lucide-react";
 
 export const create = mutation({
   args: {
@@ -90,6 +89,8 @@ export const removeById = mutation({
 
     const organizationId = (user.organization_id ?? undefined) as
       string | undefined;
+    
+    //todo: 给admin增加权限
 
     const document = await ctx.db.get(args.id);
 
