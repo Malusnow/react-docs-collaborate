@@ -1,8 +1,8 @@
 import { Liveblocks } from "@liveblocks/node";
 import { ConvexHttpClient } from "convex/browser";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth, currentUser, clerkClient } from "@clerk/nextjs/server";
 
-import { api } from "../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 const liveblocks = new Liveblocks({
@@ -10,7 +10,7 @@ const liveblocks = new Liveblocks({
 });
 
 export async function POST(req: Request) {
-  const { sessionClaims } = await auth();
+  const { sessionClaims, orgId } = await auth();
   if (!sessionClaims) {
     return new Response("Unauthorized", { status: 401 });
   }
@@ -28,23 +28,35 @@ export async function POST(req: Request) {
   }
 
   const isOwner = document.ownerId === user.id;
-  const isOrganizationMember = 
-    !!(document.organizationId && document.organizationId === sessionClaims.org_id);
+
+  let isOrganizationMember = false;
+  if (document.organizationId) {
+    if (orgId && orgId === document.organizationId) {
+      isOrganizationMember = true;
+    } else {
+      try {
+        const clerk = await clerkClient();
+        const memberships = await clerk.organizations.getOrganizationMembershipList({
+          organizationId: document.organizationId,
+          limit: 100,
+        });
+        isOrganizationMember = memberships.data.some(
+          (m) => m.publicUserData?.userId === user.id
+        );
+      } catch (err) {
+        console.error("Failed to verify org membership:", err);
+      }
+    }
+  }
 
   if (!isOwner && !isOrganizationMember) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-//   const name = user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "Anonymous";
-//   const nameToNumber = name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-//   const hue = Math.abs(nameToNumber) % 360;
-//   const color = `hsl(${hue}, 80%, 60%)`;
-
   const session = liveblocks.prepareSession(user.id, {
     userInfo: {
-    //   name,
+      name: user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "Anonymous",
       avatar: user.imageUrl,
-    //   color,
     },
   });
   session.allow(room, session.FULL_ACCESS);
