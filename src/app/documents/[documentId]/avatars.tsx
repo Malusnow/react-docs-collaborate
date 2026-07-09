@@ -34,23 +34,23 @@ const AvatarStack = () => {
           {users.map(({ connectionId, info }) => {
             return (
               <Avatar key={connectionId} src={info.avatar} name={info.name} />
-            )
+            );
           })}
         </div>
       </div>
       <Separator orientation="vertical" className="h-6" />
     </>
-  )
-}
+  );
+};
 
 interface AvatarProps {
   src: string;
   name: string;
-};
+}
 
 const Avatar = ({ src, name }: AvatarProps) => {
   return (
-    <div 
+    <div
       style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }}
       className="group -ml-2 flex shrink-0 place-content-center relative border-4 border-white rounded-full bg-gray-400"
     >

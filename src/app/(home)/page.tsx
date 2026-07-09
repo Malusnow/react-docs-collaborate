@@ -3,7 +3,6 @@
 import { usePaginatedQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 
-
 import { Navbar } from "./navbar";
 import { TemplatesGallery } from "./templates-gallery";
 import { DocumentsTable } from "./documents-table";

@@ -12,7 +12,10 @@ import { FullscreenLoader } from "@/components/fullscreen-loader";
 import { getUsers, getDocuments } from "./action";
 import { toast } from "sonner";
 import { Id } from "../../../../convex/_generated/dataModel";
-import { LEFT_MARGIN_DEFAULT, RIGHT_MARGIN_DEFAULT } from "../../../constants/margins";
+import {
+  LEFT_MARGIN_DEFAULT,
+  RIGHT_MARGIN_DEFAULT,
+} from "../../../constants/margins";
 
 type User = {
   id: string;
@@ -28,7 +31,7 @@ export function Room({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!orgId) return;
-    
+
     getUsers(orgId)
       .then(setUsers)
       .catch(() => toast.error("Failed to fetch users."));
@@ -50,7 +53,7 @@ export function Room({ children }: { children: ReactNode }) {
       }}
       resolveUsers={({ userIds }) => {
         return userIds.map(
-          (userId) => users.find((user) => user.id === userId) ?? undefined
+          (userId) => users.find((user) => user.id === userId) ?? undefined,
         );
       }}
       resolveMentionSuggestions={({ text }) => {
@@ -58,7 +61,7 @@ export function Room({ children }: { children: ReactNode }) {
 
         if (text) {
           filteredUsers = users.filter((user) =>
-            user.name.toLowerCase().includes(text.toLowerCase())
+            user.name.toLowerCase().includes(text.toLowerCase()),
           );
         }
 
@@ -74,9 +77,14 @@ export function Room({ children }: { children: ReactNode }) {
     >
       <RoomProvider
         id={params.documentId as string}
-        initialStorage={{ leftMargin: LEFT_MARGIN_DEFAULT, rightMargin: RIGHT_MARGIN_DEFAULT }}
+        initialStorage={{
+          leftMargin: LEFT_MARGIN_DEFAULT,
+          rightMargin: RIGHT_MARGIN_DEFAULT,
+        }}
       >
-        <ClientSideSuspense fallback={<FullscreenLoader label="Room loading..." />}>
+        <ClientSideSuspense
+          fallback={<FullscreenLoader label="Room loading..." />}
+        >
           {children}
         </ClientSideSuspense>
       </RoomProvider>

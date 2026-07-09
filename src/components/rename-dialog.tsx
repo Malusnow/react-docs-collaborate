@@ -33,18 +33,21 @@ export const RenameDialog = ({
   const update = useMutation(api.documents.updateById);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const [title, setTitle] = useState(initialTitle);
+  const [title, setTitle] = useState(initialTitle ?? "");
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsUpdating(true);
 
     update({ id: documentId, title: title.trim() || "Untitled" })
-      .catch(() => toast.error("Something went wrong"))
-      .then(() => toast.success("Document updated"))
-      .finally(() => {
+      .then(() => {
+        toast.success("Document updated");
         setIsUpdating(false);
         onOpenChange(false);
+      })
+      .catch(() => {
+        toast.error("Something went wrong");
+        setIsUpdating(false);
       });
   };
 

@@ -2,7 +2,10 @@
 
 import { useEditor, EditorContent } from "@tiptap/react";
 import { useEditorStore } from "@/store/useEditorStore";
-import { useLiveblocksExtension, FloatingToolbar } from "@liveblocks/react-tiptap";
+import {
+  useLiveblocksExtension,
+  FloatingToolbar,
+} from "@liveblocks/react-tiptap";
 import StarterKit from "@tiptap/starter-kit";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
@@ -24,11 +27,16 @@ import { LineHeightExtension } from "@/extensions/line-height";
 import { Ruler } from "./ruler";
 import { Threads } from "./threads";
 import { useStorage } from "@liveblocks/react";
-import { LEFT_MARGIN_DEFAULT, RIGHT_MARGIN_DEFAULT } from "../../../constants/margins";
+import {
+  LEFT_MARGIN_DEFAULT,
+  RIGHT_MARGIN_DEFAULT,
+} from "../../../constants/margins";
 
 export const Editor = () => {
-  const leftMargin = useStorage((root) => root.leftMargin) ?? LEFT_MARGIN_DEFAULT;
-  const rightMargin = useStorage((root) => root.rightMargin) ?? RIGHT_MARGIN_DEFAULT;
+  const leftMargin =
+    useStorage((root) => root.leftMargin) ?? LEFT_MARGIN_DEFAULT;
+  const rightMargin =
+    useStorage((root) => root.rightMargin) ?? RIGHT_MARGIN_DEFAULT;
   const liveblocks = useLiveblocksExtension();
   const { setEditor } = useEditorStore();
 

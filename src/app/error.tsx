@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 
 const ErrorPage = ({
   error,
-  reset
+  reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) => {
-  return ( 
+  return (
     <div className="min-h-screen flex flex-col items-center justify-center space-y-6">
       <div className="text-center space-y-4">
         <div className="flex justify-center">
@@ -24,30 +24,19 @@ const ErrorPage = ({
           <h2 className="text-xl font-semibold text-gray-900">
             Something went wrong
           </h2>
-          <p>
-            {error.message}
-          </p>
+          <p>{error.message}</p>
         </div>
       </div>
       <div className="flex items-center gap-x-3">
-        <Button
-          onClick={reset}
-          className="font-medium px-6"
-        >
+        <Button onClick={reset} className="font-medium px-6">
           Try again
         </Button>
-        <Button
-          asChild
-          variant="ghost"
-          className="font-medium"
-        >
-          <Link href="/">
-            Go back
-          </Link>
+        <Button asChild variant="ghost" className="font-medium">
+          <Link href="/">Go back</Link>
         </Button>
       </div>
     </div>
-   );
-}
- 
+  );
+};
+
 export default ErrorPage;

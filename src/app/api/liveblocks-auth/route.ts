@@ -36,12 +36,13 @@ export async function POST(req: Request) {
     } else {
       try {
         const clerk = await clerkClient();
-        const memberships = await clerk.organizations.getOrganizationMembershipList({
-          organizationId: document.organizationId,
-          limit: 100,
-        });
+        const memberships =
+          await clerk.organizations.getOrganizationMembershipList({
+            organizationId: document.organizationId,
+            limit: 100,
+          });
         isOrganizationMember = memberships.data.some(
-          (m) => m.publicUserData?.userId === user.id
+          (m) => m.publicUserData?.userId === user.id,
         );
       } catch (err) {
         console.error("Failed to verify org membership:", err);
@@ -55,7 +56,8 @@ export async function POST(req: Request) {
 
   const session = liveblocks.prepareSession(user.id, {
     userInfo: {
-      name: user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "Anonymous",
+      name:
+        user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "Anonymous",
       avatar: user.imageUrl,
     },
   });
@@ -63,4 +65,4 @@ export async function POST(req: Request) {
   const { body, status } = await session.authorize();
 
   return new Response(body, { status });
-};
+}
