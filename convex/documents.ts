@@ -2,6 +2,37 @@ import { ConvexError, v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 
 import { mutation, query } from "./_generated/server";
+import { QueryCtx } from "./_generated/server";
+import { Doc } from "./_generated/dataModel";
+
+async function requireUser(ctx: QueryCtx) {
+  const user = await ctx.auth.getUserIdentity();
+
+  if (!user) {
+    throw new ConvexError("Unauthenticated");
+  }
+
+  return user;
+}
+
+function canReadDocument(
+  user: {
+    subject: string;
+    organization_id?: unknown;
+  },
+  document: Doc<"documents">,
+) {
+  const organizationId =
+    typeof user.organization_id === "string" ? user.organization_id : undefined;
+
+  const isOwner = document.ownerId === user.subject;
+
+  const isActiveOrganizationMember =
+    document.organizationId !== undefined &&
+    document.organizationId === organizationId;
+
+  return isOwner || isActiveOrganizationMember;
+}
 
 export const getByIds = query({
   args: { ids: v.array(v.id("documents")) },
@@ -165,10 +196,15 @@ export const updateById = mutation({
 export const getById = query({
   args: { id: v.id("documents") },
   handler: async (ctx, { id }) => {
+    const user = await requireUser(ctx);
     const document = await ctx.db.get(id);
 
     if (!document) {
       throw new ConvexError("Document not found");
+    }
+
+    if (!canReadDocument(user, document)) {
+      throw new ConvexError("Forbidden");
     }
 
     return document;

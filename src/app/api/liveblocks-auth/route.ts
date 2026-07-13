@@ -1,17 +1,21 @@
 import { Liveblocks } from "@liveblocks/node";
-import { ConvexHttpClient } from "convex/browser";
 import { auth, currentUser, clerkClient } from "@clerk/nextjs/server";
 
 import { api } from "../../../../convex/_generated/api";
+import { fetchQuery } from "convex/nextjs";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 const liveblocks = new Liveblocks({
   secret: process.env.LIVEBLOCKS_SECRET_KEY!,
 });
 
 export async function POST(req: Request) {
-  const { sessionClaims, orgId } = await auth();
+  const { sessionClaims, orgId, getToken } = await auth();
   if (!sessionClaims) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
+  const token = await getToken({ template: "convex" });
+  if (!token) {
     return new Response("Unauthorized", { status: 401 });
   }
 
@@ -21,7 +25,11 @@ export async function POST(req: Request) {
   }
 
   const { room } = await req.json();
-  const document = await convex.query(api.documents.getById, { id: room });
+  const document = await fetchQuery(
+    api.documents.getById,
+    { id: room },
+    { token },
+  );
 
   if (!document) {
     return new Response("Unauthorized", { status: 401 });
