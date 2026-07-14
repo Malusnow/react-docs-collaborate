@@ -1,5 +1,5 @@
 import { Liveblocks } from "@liveblocks/node";
-import { auth, currentUser, clerkClient } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 
 import { api } from "../../../../convex/_generated/api";
 import { fetchQuery } from "convex/nextjs";
@@ -9,10 +9,7 @@ const liveblocks = new Liveblocks({
 });
 
 export async function POST(req: Request) {
-  const { sessionClaims, orgId, getToken } = await auth();
-  if (!sessionClaims) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+  const { getToken } = await auth();
 
   const token = await getToken({ template: "convex" });
   if (!token) {
@@ -32,33 +29,6 @@ export async function POST(req: Request) {
   );
 
   if (!document) {
-    return new Response("Unauthorized", { status: 401 });
-  }
-
-  const isOwner = document.ownerId === user.id;
-
-  let isOrganizationMember = false;
-  if (document.organizationId) {
-    if (orgId && orgId === document.organizationId) {
-      isOrganizationMember = true;
-    } else {
-      try {
-        const clerk = await clerkClient();
-        const memberships =
-          await clerk.organizations.getOrganizationMembershipList({
-            organizationId: document.organizationId,
-            limit: 100,
-          });
-        isOrganizationMember = memberships.data.some(
-          (m) => m.publicUserData?.userId === user.id,
-        );
-      } catch (err) {
-        console.error("Failed to verify org membership:", err);
-      }
-    }
-  }
-
-  if (!isOwner && !isOrganizationMember) {
     return new Response("Unauthorized", { status: 401 });
   }
 
