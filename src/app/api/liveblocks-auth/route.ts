@@ -1,7 +1,9 @@
 import { Liveblocks } from "@liveblocks/node";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { ConvexError } from "convex/values";
 
 import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
 import { fetchQuery } from "convex/nextjs";
 
 const liveblocks = new Liveblocks({
@@ -21,15 +23,40 @@ export async function POST(req: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const { room } = await req.json();
-  const document = await fetchQuery(
-    api.documents.getById,
-    { id: room },
-    { token },
-  );
+  let room: Id<"documents">;
 
-  if (!document) {
-    return new Response("Unauthorized", { status: 401 });
+  try {
+    const body: unknown = await req.json();
+
+    if (
+      typeof body !== "object" ||
+      body === null ||
+      !("room" in body) ||
+      typeof body.room !== "string" ||
+      !body.room
+    ) {
+      return new Response("Bad Request", { status: 400 });
+    }
+
+    room = body.room as Id<"documents">;
+  } catch {
+    return new Response("Bad Request", { status: 400 });
+  }
+
+  try {
+    await fetchQuery(api.documents.getById, { id: room }, { token });
+  } catch (error) {
+    if (error instanceof ConvexError) {
+      if (error.data === "Unauthenticated") {
+        return new Response("Unauthorized", { status: 401 });
+      }
+
+      if (error.data === "Forbidden" || error.data === "Document not found") {
+        return new Response("Forbidden", { status: 403 });
+      }
+    }
+
+    return new Response("Internal Server Error", { status: 500 });
   }
 
   const name =

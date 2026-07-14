@@ -47,8 +47,20 @@ export function Room({ children }: { children: ReactNode }) {
 
         const response = await fetch(endpoint, {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ room }),
         });
+
+        if (!response.ok) {
+          if (response.status >= 400 && response.status < 500) {
+            return {
+              error: "forbidden" as const,
+              reason: "Unable to authorize this room.",
+            };
+          }
+
+          throw new Error("Unable to authorize this room.");
+        }
 
         return await response.json();
       }}
