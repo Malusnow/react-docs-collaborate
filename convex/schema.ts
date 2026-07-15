@@ -15,4 +15,14 @@ export default defineSchema({
       searchField: "title",
       filterFields: ["ownerId", "organizationId"],
     }),
+
+  documentImages: defineTable({
+    documentId: v.id("documents"),
+    storageId: v.id("_storage"),
+    uploadedBy: v.string(),
+    contentType: v.string(),
+    size: v.number(),
+  })
+    .index("by_document_id", ["documentId"])
+    .index("by_storage_id", ["storageId"]),
 });

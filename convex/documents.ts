@@ -1,38 +1,9 @@
-import { ConvexError, v } from "convex/values";
+import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 
 import { mutation, query } from "./_generated/server";
-import { QueryCtx } from "./_generated/server";
-import { Doc } from "./_generated/dataModel";
-
-async function requireUser(ctx: QueryCtx) {
-  const user = await ctx.auth.getUserIdentity();
-
-  if (!user) {
-    throw new ConvexError("Unauthenticated");
-  }
-
-  return user;
-}
-
-function canReadDocument(
-  user: {
-    subject: string;
-    organization_id?: unknown;
-  },
-  document: Doc<"documents">,
-) {
-  const organizationId =
-    typeof user.organization_id === "string" ? user.organization_id : undefined;
-
-  const isOwner = document.ownerId === user.subject;
-
-  const isActiveOrganizationMember =
-    document.organizationId !== undefined &&
-    document.organizationId === organizationId;
-
-  return isOwner || isActiveOrganizationMember;
-}
+import { deleteImages } from "./images";
+import { requireDocumentAccess, requireUser } from "./lib/documentAccess";
 
 export const getByIds = query({
   args: { ids: v.array(v.id("documents")) },
@@ -56,11 +27,7 @@ export const create = mutation({
     initialContent: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const user = await ctx.auth.getUserIdentity();
-
-    if (!user) {
-      throw new ConvexError("Unauthorized");
-    }
+    const user = await requireUser(ctx);
 
     const organizationId = (user.organization_id ?? undefined) as
       string | undefined;
@@ -80,11 +47,7 @@ export const get = query({
     search: v.optional(v.string()),
   },
   handler: async (ctx, { search, paginationOpts }) => {
-    const user = await ctx.auth.getUserIdentity();
-
-    if (!user) {
-      throw new ConvexError("Unauthorized");
-    }
+    const user = await requireUser(ctx);
 
     const organizationId = (user.organization_id ?? undefined) as
       string | undefined;
@@ -132,31 +95,8 @@ export const get = query({
 export const removeById = mutation({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {
-    const user = await ctx.auth.getUserIdentity();
-
-    if (!user) {
-      throw new ConvexError("Unauthorized");
-    }
-
-    const organizationId = (user.organization_id ?? undefined) as
-      string | undefined;
-
-    //todo: 给admin增加权限
-
-    const document = await ctx.db.get(args.id);
-
-    if (!document) {
-      throw new ConvexError("Document not found");
-    }
-
-    const isOwner = document.ownerId === user.subject;
-    const isOrganizationMember = !!(
-      document.organizationId && document.organizationId === organizationId
-    );
-
-    if (!isOwner && !isOrganizationMember) {
-      throw new ConvexError("Unauthorized");
-    }
+    await requireDocumentAccess(ctx, args.id);
+    await deleteImages(ctx, args.id);
 
     return await ctx.db.delete(args.id);
   },
@@ -165,29 +105,7 @@ export const removeById = mutation({
 export const updateById = mutation({
   args: { id: v.id("documents"), title: v.string() },
   handler: async (ctx, args) => {
-    const user = await ctx.auth.getUserIdentity();
-
-    if (!user) {
-      throw new ConvexError("Unauthorized");
-    }
-
-    const organizationId = (user.organization_id ?? undefined) as
-      string | undefined;
-
-    const document = await ctx.db.get(args.id);
-
-    if (!document) {
-      throw new ConvexError("Document not found");
-    }
-
-    const isOwner = document.ownerId === user.subject;
-    const isOrganizationMember = !!(
-      document.organizationId && document.organizationId === organizationId
-    );
-
-    if (!isOwner && !isOrganizationMember) {
-      throw new ConvexError("Unauthorized");
-    }
+    await requireDocumentAccess(ctx, args.id);
 
     return await ctx.db.patch(args.id, { title: args.title });
   },
@@ -196,16 +114,7 @@ export const updateById = mutation({
 export const getById = query({
   args: { id: v.id("documents") },
   handler: async (ctx, { id }) => {
-    const user = await requireUser(ctx);
-    const document = await ctx.db.get(id);
-
-    if (!document) {
-      throw new ConvexError("Document not found");
-    }
-
-    if (!canReadDocument(user, document)) {
-      throw new ConvexError("Forbidden");
-    }
+    const { document } = await requireDocumentAccess(ctx, id);
 
     return document;
   },

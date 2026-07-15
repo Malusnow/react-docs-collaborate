@@ -29,6 +29,7 @@ import {
   MinusIcon,
   PlusIcon,
   ListCollapseIcon,
+  Loader2Icon,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -50,6 +51,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useState } from "react";
+import { ALLOWED_IMAGE_TYPES } from "../../../constants/image";
+import { useImageUpload } from "./use-image-upload";
 
 const LineHeightButton = () => {
   const { editor } = useEditorStore();
@@ -273,24 +276,26 @@ const AlignButton = () => {
 
 const ImageButton = () => {
   const { editor } = useEditorStore();
+  const { isUploading, uploadImage } = useImageUpload(editor);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
 
   const onChange = (src: string) => {
-    editor?.chain().focus().setImage({ src }).run();
+    return editor?.chain().focus().setImage({ src }).run() ?? false;
   };
 
-  // question htmlinputelement
   const onUpload = () => {
+    if (isUploading) return;
+
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = "image/*";
+    input.accept = ALLOWED_IMAGE_TYPES.join(",");
 
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
+    input.onchange = () => {
+      const file = input.files?.[0];
+
       if (file) {
-        const imageUrl = URL.createObjectURL(file);
-        onChange(imageUrl);
+        void uploadImage(file);
       }
     };
 
@@ -298,8 +303,7 @@ const ImageButton = () => {
   };
 
   const handleImageUrlSubmit = () => {
-    if (imageUrl) {
-      onChange(imageUrl);
+    if (imageUrl && onChange(imageUrl)) {
       setImageUrl("");
       setIsDialogOpen(false);
     }
@@ -314,9 +318,13 @@ const ImageButton = () => {
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem onClick={onUpload}>
-            <UploadIcon className="size-4 mr-2" />
-            Upload
+          <DropdownMenuItem onClick={onUpload} disabled={isUploading}>
+            {isUploading ? (
+              <Loader2Icon className="size-4 mr-2 animate-spin" />
+            ) : (
+              <UploadIcon className="size-4 mr-2" />
+            )}
+            {isUploading ? "Uploading..." : "Upload"}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsDialogOpen(true)}>
             <SearchIcon className="size-4 mr-2" />
