@@ -1,7 +1,7 @@
 "use client";
 
 import { type Level } from "@tiptap/extension-heading";
-import { type ColorResult, SketchPicker } from "react-color";
+import { type ColorResult } from "react-color";
 import {
   LucideIcon,
   Undo2Icon,
@@ -53,6 +53,7 @@ import {
 import { useState } from "react";
 import { ALLOWED_IMAGE_TYPES } from "../../../constants/image";
 import { useImageUpload } from "./use-image-upload";
+import { ColorPicker } from "./color-picker";
 
 const LineHeightButton = () => {
   const { editor } = useEditorStore();
@@ -408,7 +409,7 @@ const HighlightColorButton = () => {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="p-0">
-        <SketchPicker color={value} onChange={onChange} />
+        <ColorPicker color={value} onChange={onChange} />
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -432,7 +433,7 @@ const TextColorButton = () => {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="p-0">
-        <SketchPicker color={value} onChange={onChange} />
+        <ColorPicker color={value} onChange={onChange} />
       </DropdownMenuContent>
     </DropdownMenu>
   );
