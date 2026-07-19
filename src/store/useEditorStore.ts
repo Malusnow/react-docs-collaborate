@@ -8,5 +8,6 @@ interface EditorState {
 
 export const useEditorStore = create<EditorState>((set) => ({
   editor: null,
-  setEditor: (editor) => set({ editor }),
+  setEditor: (editor) =>
+    set((state) => (state.editor === editor ? state : { editor })),
 }));

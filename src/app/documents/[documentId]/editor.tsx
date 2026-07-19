@@ -42,34 +42,17 @@ export const Editor = ({ initialContent }: EditorProps) => {
     initialContent,
     offlineSupport_experimental: true,
   });
-  const { setEditor } = useEditorStore();
+  const setEditor = useEditorStore((state) => state.setEditor);
 
   const editor = useEditor({
     autofocus: true,
-    immediatelyRender: false, //??
+    immediatelyRender: false,
+    shouldRerenderOnTransaction: false,
     onCreate({ editor }) {
       setEditor(editor);
     },
     onDestroy() {
       setEditor(null);
-    },
-    onUpdate({ editor }) {
-      setEditor(editor);
-    },
-    onSelectionUpdate({ editor }) {
-      setEditor(editor);
-    },
-    onTransaction({ editor }) {
-      setEditor(editor);
-    },
-    onFocus({ editor }) {
-      setEditor(editor);
-    },
-    onBlur({ editor }) {
-      setEditor(editor);
-    },
-    onContentError({ editor }) {
-      setEditor(editor);
     },
     editorProps: {
       attributes: {

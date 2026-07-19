@@ -55,7 +55,7 @@ interface NavbarProps {
 export const Navbar = ({ data }: NavbarProps) => {
   const documentId = data._id;
   const title = data.title;
-  const { editor } = useEditorStore();
+  const editor = useEditorStore((state) => state.editor);
   const router = useRouter();
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);

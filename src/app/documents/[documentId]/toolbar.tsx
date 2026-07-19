@@ -1,6 +1,7 @@
 "use client";
 
 import { type Level } from "@tiptap/extension-heading";
+import { type Editor, useEditorState } from "@tiptap/react";
 import { type ColorResult } from "react-color";
 import {
   LucideIcon,
@@ -56,7 +57,12 @@ import { useImageUpload } from "./use-image-upload";
 import { ColorPicker } from "./color-picker";
 
 const LineHeightButton = () => {
-  const { editor } = useEditorStore();
+  const editor = useEditorStore((state) => state.editor);
+  const currentLineHeight = useEditorState({
+    editor,
+    selector: ({ editor: currentEditor }) =>
+      currentEditor?.getAttributes("paragraph").lineHeight,
+  });
 
   const lineHeights = [
     { label: "Default", value: "normal" },
@@ -80,8 +86,7 @@ const LineHeightButton = () => {
             onClick={() => editor?.chain().focus().setLineHeight(value).run()}
             className={cn(
               "flex items-center gap-x-2 px-2 py-1 rounded-sm hover:bg-neutral-200/80",
-              editor?.getAttributes("paragraph").lineHeight === value &&
-                "bg-neutral-200/80",
+              currentLineHeight === value && "bg-neutral-200/80",
             )}
           >
             <span className="text-sm">{label}</span>
@@ -93,11 +98,14 @@ const LineHeightButton = () => {
 };
 
 const FontSizeButton = () => {
-  const { editor } = useEditorStore();
-
-  const currentFontSize = editor?.getAttributes("textStyle").fontSize
-    ? editor?.getAttributes("textStyle").fontSize.replace("px", "")
-    : "16";
+  const editor = useEditorStore((state) => state.editor);
+  const currentFontSize =
+    useEditorState({
+      editor,
+      selector: ({ editor: currentEditor }) =>
+        currentEditor?.getAttributes("textStyle").fontSize?.replace("px", "") ??
+        "16",
+    }) ?? "16";
 
   const [fontSize, setFontSize] = useState(currentFontSize);
   const [inputValue, setInputValue] = useState(fontSize);
@@ -123,7 +131,7 @@ const FontSizeButton = () => {
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      e.preventDefault(); //作用？？
+      e.preventDefault();
       updateFontSize(inputValue);
       editor?.commands.focus();
     }
@@ -180,19 +188,26 @@ const FontSizeButton = () => {
 };
 
 const ListButton = () => {
-  const { editor } = useEditorStore();
+  const editor = useEditorStore((state) => state.editor);
+  const activeLists = useEditorState({
+    editor,
+    selector: ({ editor: currentEditor }) => ({
+      bulletList: currentEditor?.isActive("bulletList") ?? false,
+      orderedList: currentEditor?.isActive("orderedList") ?? false,
+    }),
+  });
 
   const lists = [
     {
       label: "Bullet List",
       icon: ListIcon,
-      isActive: () => editor?.isActive("bulletList"),
+      isActive: activeLists?.bulletList,
       onClick: () => editor?.chain().focus().toggleBulletList().run(),
     },
     {
       label: "Ordered List",
       icon: ListOrderedIcon,
-      isActive: () => editor?.isActive("orderedList"),
+      isActive: activeLists?.orderedList,
       onClick: () => editor?.chain().focus().toggleOrderedList().run(),
     },
   ];
@@ -211,7 +226,7 @@ const ListButton = () => {
             onClick={onClick}
             className={cn(
               "flex items-center gap-x-2 px-2 py-1 rounded-sm hover:bg-neutral-200/80",
-              isActive() && "bg-neutral-200/80",
+              isActive && "bg-neutral-200/80",
             )}
           >
             <Icon className="size-4" />
@@ -224,7 +239,16 @@ const ListButton = () => {
 };
 
 const AlignButton = () => {
-  const { editor } = useEditorStore();
+  const editor = useEditorStore((state) => state.editor);
+  const activeAlignment = useEditorState({
+    editor,
+    selector: ({ editor: currentEditor }) => ({
+      left: currentEditor?.isActive({ textAlign: "left" }) ?? false,
+      center: currentEditor?.isActive({ textAlign: "center" }) ?? false,
+      right: currentEditor?.isActive({ textAlign: "right" }) ?? false,
+      justify: currentEditor?.isActive({ textAlign: "justify" }) ?? false,
+    }),
+  });
 
   const alignments = [
     {
@@ -263,7 +287,9 @@ const AlignButton = () => {
             onClick={() => editor?.chain().focus().setTextAlign(value).run()}
             className={cn(
               "flex items-center gap-x-2 px-2 py-1 rounded-sm hover:bg-neutral-200/80",
-              editor?.isActive({ textAlign: value }) && "bg-neutral-200/80",
+              activeAlignment?.[
+                value as "left" | "center" | "right" | "justify"
+              ] && "bg-neutral-200/80",
             )}
           >
             <Icon className="size-4" />
@@ -276,7 +302,7 @@ const AlignButton = () => {
 };
 
 const ImageButton = () => {
-  const { editor } = useEditorStore();
+  const editor = useEditorStore((state) => state.editor);
   const { isUploading, uploadImage } = useImageUpload(editor);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
@@ -359,11 +385,11 @@ const ImageButton = () => {
 };
 
 const LinkButton = () => {
-  const { editor } = useEditorStore();
+  const editor = useEditorStore((state) => state.editor);
   const [value, setValue] = useState("");
 
   const onChange = (href: string) => {
-    editor?.chain().focus().extendMarkRange("link").setLink({ href }).run(); // question
+    editor?.chain().focus().extendMarkRange("link").setLink({ href }).run();
     setValue("");
   };
 
@@ -393,9 +419,13 @@ const LinkButton = () => {
 };
 
 const HighlightColorButton = () => {
-  const { editor } = useEditorStore();
-
-  const value = editor?.getAttributes("highlight").color || "#ffffff";
+  const editor = useEditorStore((state) => state.editor);
+  const value =
+    useEditorState({
+      editor,
+      selector: ({ editor: currentEditor }) =>
+        currentEditor?.getAttributes("highlight").color ?? "#ffffff",
+    }) ?? "#ffffff";
 
   const onChange = (color: ColorResult) => {
     editor?.chain().focus().setHighlight({ color: color.hex }).run();
@@ -416,9 +446,13 @@ const HighlightColorButton = () => {
 };
 
 const TextColorButton = () => {
-  const { editor } = useEditorStore();
-
-  const value = editor?.getAttributes("textStyle").color || "#000000";
+  const editor = useEditorStore((state) => state.editor);
+  const value =
+    useEditorState({
+      editor,
+      selector: ({ editor: currentEditor }) =>
+        currentEditor?.getAttributes("textStyle").color ?? "#000000",
+    }) ?? "#000000";
 
   const onChange = (color: ColorResult) => {
     editor?.chain().focus().setColor(color.hex).run();
@@ -440,7 +474,20 @@ const TextColorButton = () => {
 };
 
 const HeadingLevelButton = () => {
-  const { editor } = useEditorStore();
+  const editor = useEditorStore((state) => state.editor);
+  const currentHeadingLevel =
+    useEditorState({
+      editor,
+      selector: ({ editor: currentEditor }) => {
+        for (let level = 1; level <= 5; level++) {
+          if (currentEditor?.isActive("heading", { level })) {
+            return level;
+          }
+        }
+
+        return 0;
+      },
+    }) ?? 0;
 
   const headings = [
     { label: "Normal Text", value: 0, fontSize: "16px" },
@@ -451,20 +498,15 @@ const HeadingLevelButton = () => {
     { label: "Heading 5", value: 5, fontSize: "16px" },
   ];
 
-  const getCurrentHeading = () => {
-    for (let level = 1; level <= 5; level++) {
-      if (editor?.isActive("heading", { level })) {
-        return `Heading ${level}`;
-      }
-    }
-    return "Normal Text";
-  };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="h-7 w-[120px] shrink-0 flex items-center justify-between rounded-sm hover:bg-neutral-200/80 px-1.5 overflow-hidden text-sm">
-          <span className="truncate">{getCurrentHeading()}</span>
+          <span className="truncate">
+            {currentHeadingLevel === 0
+              ? "Normal Text"
+              : `Heading ${currentHeadingLevel}`}
+          </span>
           <ChevronDownIcon className="ml-2 size-4 shrink-0" />
         </button>
       </DropdownMenuTrigger>
@@ -486,9 +528,7 @@ const HeadingLevelButton = () => {
             }}
             className={cn(
               "flex items-center gap-x-2 px-2 py-1 rounded-sm hover:bg-neutral-200/80",
-              (value === 0 && !editor?.isActive("heading")) ||
-                (editor?.isActive("heading", { level: value }) &&
-                  "bg-neutral-200/80"),
+              currentHeadingLevel === value && "bg-neutral-200/80",
             )}
           >
             {label}
@@ -500,7 +540,13 @@ const HeadingLevelButton = () => {
 };
 
 const FontFamilyButton = () => {
-  const { editor } = useEditorStore();
+  const editor = useEditorStore((state) => state.editor);
+  const currentFontFamily =
+    useEditorState({
+      editor,
+      selector: ({ editor: currentEditor }) =>
+        currentEditor?.getAttributes("textStyle").fontFamily ?? "Arial",
+    }) ?? "Arial";
 
   const fonts = [
     { label: "Arial", value: "Arial" },
@@ -514,9 +560,7 @@ const FontFamilyButton = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="h-7 w-[120px] shrink-0 flex items-center justify-between rounded-sm hover:bg-neutral-200/80 px-1.5 overflow-hidden text-sm">
-          <span className="truncate">
-            {editor?.getAttributes("textStyle").fontFamily || "Arial"}
-          </span>
+          <span className="truncate">{currentFontFamily}</span>
           <ChevronDownIcon className="ml-2 size-4 shrink-0" />
         </button>
       </DropdownMenuTrigger>
@@ -527,8 +571,7 @@ const FontFamilyButton = () => {
             key={value}
             className={cn(
               "flex items-center gap-x-2 px-2 py-1 rounded-sm hover:bg-neutral-200/80",
-              editor?.getAttributes("textStyle").fontFamily === value &&
-                "bg-neutral-200/80",
+              currentFontFamily === value && "bg-neutral-200/80",
             )}
             style={{ fontFamily: value }}
           >
@@ -564,84 +607,116 @@ const ToolbarButton = ({
   );
 };
 
+interface EditorStateToolbarButtonProps extends Omit<
+  ToolbarButtonProps,
+  "isActive"
+> {
+  editor: Editor | null;
+  isActive: (editor: Editor) => boolean;
+}
+
+const EditorStateToolbarButton = ({
+  editor,
+  isActive,
+  ...props
+}: EditorStateToolbarButtonProps) => {
+  const active =
+    useEditorState({
+      editor,
+      selector: ({ editor: currentEditor }) =>
+        currentEditor ? isActive(currentEditor) : false,
+    }) ?? false;
+
+  return <ToolbarButton {...props} isActive={active} />;
+};
+
 export const Toolbar = () => {
-  const { editor } = useEditorStore();
-  const sections: {
+  const editor = useEditorStore((state) => state.editor);
+  const commandSections: {
     label: string;
     icon: LucideIcon;
     onClick: () => void;
-    isActive?: boolean;
-  }[][] = [
-    [
-      {
-        label: "Undo",
-        icon: Undo2Icon,
-        onClick: () => editor?.chain().focus().undo().run(),
+  }[] = [
+    {
+      label: "Undo",
+      icon: Undo2Icon,
+      onClick: () => editor?.chain().focus().undo().run(),
+    },
+    {
+      label: "Redo",
+      icon: Redo2Icon,
+      onClick: () => editor?.chain().focus().redo().run(),
+    },
+    {
+      label: "Print",
+      icon: PrinterIcon,
+      onClick: () => window.print(),
+    },
+    {
+      label: "Spell Check",
+      icon: SpellCheckIcon,
+      onClick: () => {
+        const current = editor?.view.dom.getAttribute("spellcheck");
+        const newValue = current === "true" ? "false" : "true";
+        editor?.view.dom.setAttribute("spellcheck", newValue);
       },
-      {
-        label: "Redo",
-        icon: Redo2Icon,
-        onClick: () => editor?.chain().focus().redo().run(),
-      },
-      {
-        label: "Print",
-        icon: PrinterIcon,
-        onClick: () => window.print(),
-      },
-      {
-        label: "Spell Check",
-        icon: SpellCheckIcon,
-        onClick: () => {
-          const current = editor?.view.dom.getAttribute("spellcheck");
-          const newValue = current === "true" ? "false" : "true";
-          editor?.view.dom.setAttribute("spellcheck", newValue);
-        },
-      },
-    ],
-    [
-      {
-        label: "Bold",
-        icon: BoldIcon,
-        onClick: () => editor?.chain().focus().toggleBold().run(),
-        isActive: editor?.isActive("bold"),
-      },
-      {
-        label: "Italic",
-        icon: ItalicIcon,
-        onClick: () => editor?.chain().focus().toggleItalic().run(),
-        isActive: editor?.isActive("italic"),
-      },
-      {
-        label: "Underline",
-        icon: UnderlineIcon,
-        onClick: () => editor?.chain().focus().toggleUnderline().run(),
-        isActive: editor?.isActive("underline"),
-      },
-    ],
-    [
-      {
-        label: "Comment",
-        icon: MessageSquarePlusIcon,
-        onClick: () => editor?.chain().focus().addPendingComment().run(),
-        isActive: editor?.isActive("liveblocksCommentMark"),
-      },
-      {
-        label: "List Todo",
-        icon: ListTodoIcon,
-        onClick: () => editor?.chain().focus().toggleTaskList().run(),
-        isActive: editor?.isActive("taskList"),
-      },
-      {
-        label: "Remove Formatting",
-        icon: RemoveFormattingIcon,
-        onClick: () => editor?.chain().focus().unsetAllMarks().run(),
-        isActive: editor?.isActive("taskList"),
-      },
-    ],
+    },
   ];
+  const formattingButtons: {
+    label: string;
+    icon: LucideIcon;
+    onClick: () => void;
+    isActive: (editor: Editor) => boolean;
+  }[] = [
+    {
+      label: "Bold",
+      icon: BoldIcon,
+      onClick: () => editor?.chain().focus().toggleBold().run(),
+      isActive: (currentEditor) => currentEditor.isActive("bold"),
+    },
+    {
+      label: "Italic",
+      icon: ItalicIcon,
+      onClick: () => editor?.chain().focus().toggleItalic().run(),
+      isActive: (currentEditor) => currentEditor.isActive("italic"),
+    },
+    {
+      label: "Underline",
+      icon: UnderlineIcon,
+      onClick: () => editor?.chain().focus().toggleUnderline().run(),
+      isActive: (currentEditor) => currentEditor.isActive("underline"),
+    },
+  ];
+  const insertAndListButtons: {
+    label: string;
+    icon: LucideIcon;
+    onClick: () => void;
+    isActive: (editor: Editor) => boolean;
+  }[] = [
+    {
+      label: "Comment",
+      icon: MessageSquarePlusIcon,
+      onClick: () => editor?.chain().focus().addPendingComment().run(),
+      isActive: (currentEditor) =>
+        currentEditor.isActive("liveblocksCommentMark"),
+    },
+    {
+      label: "List Todo",
+      icon: ListTodoIcon,
+      onClick: () => editor?.chain().focus().toggleTaskList().run(),
+      isActive: (currentEditor) => currentEditor.isActive("taskList"),
+    },
+    {
+      label: "Remove Formatting",
+      icon: RemoveFormattingIcon,
+      onClick: () => editor?.chain().focus().unsetAllMarks().run(),
+      isActive: (currentEditor) => currentEditor.isActive("taskList"),
+    },
+  ];
+
   return (
     <div className="bg-[#f1f4f9] px-2.5 py-0.5 rounded-[24px] min-h-[40px] flex items-center gap-x-0.5 overflow-x-auto">
-      {sections[0].map((item) => (
+      {commandSections.map((item) => (
         <ToolbarButton key={item.label} {...item} />
       ))}
       <Separator orientation="vertical" className="h-6 bg-neutral-300" />
@@ -651,8 +726,8 @@ export const Toolbar = () => {
       <Separator orientation="vertical" className="h-6 bg-neutral-300" />
       <FontSizeButton />
       <Separator orientation="vertical" className="h-6 bg-neutral-300" />
-      {sections[1].map((item) => (
-        <ToolbarButton key={item.label} {...item} />
+      {formattingButtons.map((item) => (
+        <EditorStateToolbarButton key={item.label} editor={editor} {...item} />
       ))}
       <TextColorButton />
       <HighlightColorButton />
@@ -662,8 +737,8 @@ export const Toolbar = () => {
       <AlignButton />
       <LineHeightButton />
       <ListButton />
-      {sections[2].map((item) => (
-        <ToolbarButton key={item.label} {...item} />
+      {insertAndListButtons.map((item) => (
+        <EditorStateToolbarButton key={item.label} editor={editor} {...item} />
       ))}
     </div>
   );
