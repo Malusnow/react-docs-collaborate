@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
 
+env:
+  DOCKER_BUILD_RECORD: "true"
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -16,13 +19,13 @@ jobs:
       - name: Save image
         run: docker save docs-collaborate | gzip > image.tar.gz
 
-      - name: Copy image to server
+      - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "image.tar.gz,docker-compose.yml,.env.production"
+          source: "image.tar.gz,docker-compose.yml"
           target: "~/docs-collaborate"
 
       - name: Deploy on server
@@ -33,6 +36,13 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd ~/docs-collaborate
+            cat > .env.production << 'EOF'
+            NEXT_PUBLIC_CONVEX_URL=${{ secrets.CONVEX_URL }}
+            NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }}
+            CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}
+            CLERK_ISSUER_DOMAIN=${{ secrets.CLERK_ISSUER_DOMAIN }}
+            LIVEBLOCKS_SECRET_KEY=${{ secrets.LIVEBLOCKS_SECRET_KEY }}
+            EOF
             docker load < image.tar.gz
             docker compose up -d --force-recreate
             rm -f image.tar.gz
