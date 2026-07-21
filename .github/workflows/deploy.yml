@@ -14,7 +14,14 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t docs-collaborate .
+        run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_CONVEX_URL=${{ secrets.CONVEX_URL }} \
+            --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }} \
+            --build-arg CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }} \
+            --build-arg CLERK_ISSUER_DOMAIN=${{ secrets.CLERK_ISSUER_DOMAIN }} \
+            --build-arg LIVEBLOCKS_SECRET_KEY=${{ secrets.LIVEBLOCKS_SECRET_KEY }} \
+            -t docs-collaborate .
 
       - name: Save image
         run: docker save docs-collaborate | gzip > image.tar.gz
