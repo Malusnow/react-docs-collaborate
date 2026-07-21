@@ -24,6 +24,12 @@
 .DS_Store
 *.pem
 
+# deploy
+image.tar.gz
+
+# production env
+.env.production
+
 # debug
 npm-debug.log*
 yarn-debug.log*
