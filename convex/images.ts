@@ -77,3 +77,29 @@ export const saveUploadedImage = mutation({
     return { imageId, storageId, url };
   },
 });
+
+export const removeOrphanImages = mutation({
+  args: {
+    documentId: v.id("documents"),
+    activeImageUrls: v.array(v.string()),
+  },
+  handler: async (ctx, { documentId, activeImageUrls }) => {
+    await requireDocumentAccess(ctx, documentId);
+
+    const registeredImages = await ctx.db
+      .query("documentImages")
+      .withIndex("by_document_id", (q) => q.eq("documentId", documentId))
+      .collect();
+
+    const activeSet = new Set(activeImageUrls);
+
+    for (const image of registeredImages) {
+      const url = await ctx.storage.getUrl(image.storageId);
+
+      if (url && !activeSet.has(url)) {
+        await ctx.storage.delete(image.storageId);
+        await ctx.db.delete(image._id);
+      }
+    }
+  },
+});

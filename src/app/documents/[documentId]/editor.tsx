@@ -1,8 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import { useEditorStore } from "@/store/useEditorStore";
 import { useLiveblocksExtension } from "@liveblocks/react-tiptap";
+import { useMutation } from "convex/react";
+import { useParams } from "next/navigation";
 import StarterKit from "@tiptap/starter-kit";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
@@ -28,6 +31,8 @@ import {
   LEFT_MARGIN_DEFAULT,
   RIGHT_MARGIN_DEFAULT,
 } from "../../../constants/margins";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
 
 interface EditorProps {
   initialContent: string | undefined;
@@ -105,6 +110,32 @@ export const Editor = ({ initialContent }: EditorProps) => {
     ],
     content: `<h1>Welcome to Docs Collaborate!</h1>`,
   });
+
+  const removeOrphanImages = useMutation(api.images.removeOrphanImages);
+  const params = useParams<{ documentId: string }>();
+
+  // 用户离开文档页时，清理正文中不再引用的图片
+  useEffect(() => {
+    return () => {
+      if (!editor) return;
+
+      const activeImageUrls: string[] = [];
+      editor.state.doc.descendants((node) => {
+        if (node.type.name === "image" && typeof node.attrs.src === "string") {
+          activeImageUrls.push(node.attrs.src);
+        }
+      });
+
+      if (activeImageUrls.length === 0) return;
+
+      const documentId = params.documentId as Id<"documents">;
+
+      removeOrphanImages({ documentId, activeImageUrls }).catch(() => {
+        // 清理失败不阻塞用户离开，静默处理
+      });
+    };
+    // 只在组件卸载时执行清理
+  }, []);
 
   return (
     <div className="size-full overflow-x-auto bg-[#f9fbfd] px-4 print:p-0 print:bg-white print:overflow-visible">
