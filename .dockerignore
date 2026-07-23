@@ -1,0 +1,16 @@
+.git
+.github
+.next
+node_modules
+
+.env
+.env.*
+!.env.example
+
+*.log
+*.tar
+*.tar.gz
+
+AGENTS.md
+DEPLOY.md
+TASKS.md

@@ -5,18 +5,23 @@ WORKDIR /app
 
 # 依赖
 COPY package.json package-lock.json ./
-RUN npm ci --legacy-peer-deps
+RUN npm ci --legacy-peer-deps \
+    --no-audit \
+    --no-fund \
+    --fetch-retries=5 \
+    --fetch-retry-factor=2 \
+    --fetch-retry-mintimeout=10000 \
+    --fetch-retry-maxtimeout=60000 \
+    --fetch-timeout=300000
 
 ARG NEXT_PUBLIC_CONVEX_URL
 ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 ARG NEXT_PUBLIC_COLLABORATION_URL
-ARG CLERK_SECRET_KEY
 ARG CLERK_ISSUER_DOMAIN
 
 ENV NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL
 ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 ENV NEXT_PUBLIC_COLLABORATION_URL=$NEXT_PUBLIC_COLLABORATION_URL
-ENV CLERK_SECRET_KEY=$CLERK_SECRET_KEY
 ENV CLERK_ISSUER_DOMAIN=$CLERK_ISSUER_DOMAIN
 
 # 复制源码并构建

@@ -19,7 +19,6 @@ jobs:
             --build-arg NEXT_PUBLIC_CONVEX_URL=${{ secrets.CONVEX_URL }} \
             --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }} \
             --build-arg NEXT_PUBLIC_COLLABORATION_URL=${{ secrets.COLLABORATION_URL }} \
-            --build-arg CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }} \
             --build-arg CLERK_ISSUER_DOMAIN=${{ secrets.CLERK_ISSUER_DOMAIN }} \
             -t docs-collaborate .
 
