@@ -60,7 +60,7 @@ export function CollaborationProvider({
   documentId,
   children,
 }: CollaborationProviderProps) {
-  const { getToken } = useAuth();
+  const { getToken, isLoaded: isAuthLoaded, isSignedIn } = useAuth();
   const getTokenRef = useRef(getToken);
   getTokenRef.current = getToken;
 
@@ -111,13 +111,33 @@ export function CollaborationProvider({
       destroyTimeoutRef.current = null;
     }
 
+    const scheduleDestroy = () => {
+      destroyTimeoutRef.current = setTimeout(() => {
+        const resources = resourcesRef.current;
+        resources?.remote.disconnect();
+        resources?.remote.destroy();
+        resources?.local.destroy();
+        resourcesRef.current = null;
+        ydoc.destroy();
+      }, 0);
+    };
+
+    if (!isAuthLoaded) {
+      return scheduleDestroy;
+    }
+
+    if (!isSignedIn) {
+      setConnectionStatus("disconnected");
+      setConnectionError("You need to sign in to open this document.");
+      scheduleDestroy();
+      return;
+    }
+
     const collaborationUrl = process.env.NEXT_PUBLIC_COLLABORATION_URL;
     if (!collaborationUrl) {
       setConnectionStatus("disconnected");
       setConnectionError("Collaboration service is not configured.");
-      return () => {
-        destroyTimeoutRef.current = setTimeout(() => ydoc.destroy(), 0);
-      };
+      return scheduleDestroy;
     }
 
     if (!resourcesRef.current) {
@@ -168,16 +188,9 @@ export function CollaborationProvider({
 
     return () => {
       window.clearInterval(tokenRefreshInterval);
-
-      destroyTimeoutRef.current = setTimeout(() => {
-        resources.remote.disconnect();
-        resources.remote.destroy();
-        resources.local.destroy();
-        ydoc.destroy();
-        resourcesRef.current = null;
-      }, 0);
+      scheduleDestroy();
     };
-  }, [documentId, ydoc]);
+  }, [documentId, isAuthLoaded, isSignedIn, ydoc]);
 
   const value = useMemo(
     () => ({

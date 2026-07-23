@@ -52,6 +52,9 @@ export default class AuthenticationExtension implements Extension<CollaborationC
 
   private async authorize(documentName: string, token: string) {
     if (!token.trim()) {
+      console.warn(
+        `[collaboration] Authentication rejected for ${documentName}: token is empty.`,
+      );
       throw new Error("Not authorized.");
     }
 
@@ -63,13 +66,21 @@ export default class AuthenticationExtension implements Extension<CollaborationC
       await convex.query(api.documents.getById, {
         id: documentId as Id<"documents">,
       });
-    } catch {
+    } catch (error) {
+      console.warn(
+        `[collaboration] Authorization query failed for ${documentName}: ${
+          error instanceof Error ? error.message : "Unknown Convex error"
+        }`,
+      );
       throw new Error("Not authorized.");
     }
 
     const payload = decodeJwtPayload(token);
     const userId = typeof payload?.sub === "string" ? payload.sub : null;
     if (!userId) {
+      console.warn(
+        `[collaboration] Authentication rejected for ${documentName}: token subject is missing.`,
+      );
       throw new Error("Not authorized.");
     }
 
