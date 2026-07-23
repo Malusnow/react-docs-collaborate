@@ -12,7 +12,6 @@ import {
   BoldIcon,
   ItalicIcon,
   UnderlineIcon,
-  MessageSquarePlusIcon,
   ListTodoIcon,
   RemoveFormattingIcon,
   ChevronDownIcon,
@@ -693,13 +692,6 @@ export const Toolbar = () => {
     onClick: () => void;
     isActive: (editor: Editor) => boolean;
   }[] = [
-    {
-      label: "Comment",
-      icon: MessageSquarePlusIcon,
-      onClick: () => editor?.chain().focus().addPendingComment().run(),
-      isActive: (currentEditor) =>
-        currentEditor.isActive("liveblocksCommentMark"),
-    },
     {
       label: "List Todo",
       icon: ListTodoIcon,

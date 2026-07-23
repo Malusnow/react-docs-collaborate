@@ -1,106 +1,44 @@
 "use client";
 
-import { ReactNode, useState, useEffect } from "react";
-import {
-  LiveblocksProvider,
-  RoomProvider,
-  ClientSideSuspense,
-} from "@liveblocks/react/suspense";
+import { ReactNode } from "react";
 import { useParams } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
-import { FullscreenLoader } from "@/components/fullscreen-loader";
-import { getUsers, getDocuments } from "./action";
-import { toast } from "sonner";
-import { Id } from "../../../../convex/_generated/dataModel";
 import {
-  LEFT_MARGIN_DEFAULT,
-  RIGHT_MARGIN_DEFAULT,
-} from "../../../constants/margins";
+  CollaborationProvider,
+  useCollaboration,
+} from "@/components/collaboration-provider";
+import { FullscreenLoader } from "@/components/fullscreen-loader";
 
-type User = {
-  id: string;
-  name: string;
-  avatar: string;
-  color: string;
-};
+interface RoomProps {
+  children: ReactNode;
+}
 
-export function Room({ children }: { children: ReactNode }) {
-  const params = useParams();
-  const { orgId } = useAuth();
+function CollaborationGate({ children }: RoomProps) {
+  const { isReady, connectionError } = useCollaboration();
 
-  const [users, setUsers] = useState<User[]>([]);
+  if (connectionError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-6 text-center text-sm text-muted-foreground">
+        {connectionError}
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    if (!orgId) return;
+  if (!isReady) {
+    return <FullscreenLoader label="Loading document..." />;
+  }
 
-    getUsers(orgId)
-      .then(setUsers)
-      .catch(() => toast.error("Failed to fetch users."));
-  }, [orgId]);
+  return children;
+}
+
+export function Room({ children }: RoomProps) {
+  const params = useParams<{ documentId: string }>();
 
   return (
-    <LiveblocksProvider
-      throttle={16}
-      authEndpoint={async () => {
-        const endpoint = "/api/liveblocks-auth";
-        const room = params.documentId as string;
-
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ room }),
-        });
-
-        if (!response.ok) {
-          if (response.status >= 400 && response.status < 500) {
-            return {
-              error: "forbidden" as const,
-              reason: "Unable to authorize this room.",
-            };
-          }
-
-          throw new Error("Unable to authorize this room.");
-        }
-
-        return await response.json();
-      }}
-      resolveUsers={({ userIds }) => {
-        return userIds.map(
-          (userId) => users.find((user) => user.id === userId) ?? undefined,
-        );
-      }}
-      resolveMentionSuggestions={({ text }) => {
-        let filteredUsers = users;
-
-        if (text) {
-          filteredUsers = users.filter((user) =>
-            user.name.toLowerCase().includes(text.toLowerCase()),
-          );
-        }
-
-        return filteredUsers.map((user) => user.id);
-      }}
-      resolveRoomsInfo={async ({ roomIds }) => {
-        const documents = await getDocuments(roomIds as Id<"documents">[]);
-        return documents.map((document) => ({
-          id: document.id,
-          name: document.name,
-        }));
-      }}
+    <CollaborationProvider
+      key={params.documentId}
+      documentId={params.documentId}
     >
-      <RoomProvider
-        id={params.documentId as string}
-        initialStorage={{
-          leftMargin: LEFT_MARGIN_DEFAULT,
-          rightMargin: RIGHT_MARGIN_DEFAULT,
-        }}
-      >
-        <ClientSideSuspense
-          fallback={<FullscreenLoader label="Room loading..." />}
-        >
-          {children}
-        </ClientSideSuspense>
-      </RoomProvider>
-    </LiveblocksProvider>
+      <CollaborationGate>{children}</CollaborationGate>
+    </CollaborationProvider>
   );
 }

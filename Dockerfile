@@ -1,5 +1,5 @@
 # ===== 构建阶段 =====
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -9,13 +9,13 @@ RUN npm ci --legacy-peer-deps
 
 ARG NEXT_PUBLIC_CONVEX_URL
 ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-ARG LIVEBLOCKS_SECRET_KEY
+ARG NEXT_PUBLIC_COLLABORATION_URL
 ARG CLERK_SECRET_KEY
 ARG CLERK_ISSUER_DOMAIN
 
 ENV NEXT_PUBLIC_CONVEX_URL=$NEXT_PUBLIC_CONVEX_URL
 ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-ENV LIVEBLOCKS_SECRET_KEY=$LIVEBLOCKS_SECRET_KEY
+ENV NEXT_PUBLIC_COLLABORATION_URL=$NEXT_PUBLIC_COLLABORATION_URL
 ENV CLERK_SECRET_KEY=$CLERK_SECRET_KEY
 ENV CLERK_ISSUER_DOMAIN=$CLERK_ISSUER_DOMAIN
 
@@ -24,7 +24,7 @@ COPY . .
 RUN npm run build
 
 # ===== 运行阶段 =====
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 
@@ -34,7 +34,11 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/next.config.ts ./
+COPY --from=builder /app/server ./server
+COPY --from=builder /app/src/constants ./src/constants
+COPY --from=builder /app/src/extensions ./src/extensions
+COPY --from=builder /app/convex/_generated ./convex/_generated
 
-EXPOSE 3000
+EXPOSE 3000 4000
 
 CMD ["npm", "start"]

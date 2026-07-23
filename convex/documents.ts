@@ -2,24 +2,16 @@ import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 
 import { mutation, query } from "./_generated/server";
+import { Doc } from "./_generated/dataModel";
+import { deleteCollaborationState } from "./collaboration";
 import { deleteImages } from "./images";
 import { requireDocumentAccess, requireUser } from "./lib/documentAccess";
 
-export const getByIds = query({
-  args: { ids: v.array(v.id("documents")) },
-  handler: async (ctx, { ids }) => {
-    const documents = [];
-    for (const id of ids) {
-      const document = await ctx.db.get(id);
-      if (document) {
-        documents.push({ id: document._id, name: document.title });
-      } else {
-        documents.push({ id, name: "[Removed]" });
-      }
-    }
-    return documents;
-  },
-});
+function omitLegacyCollaborationState(document: Doc<"documents">) {
+  const metadata = { ...document };
+  delete metadata.collaborationState;
+  return metadata;
+}
 
 export const create = mutation({
   args: {
@@ -54,41 +46,45 @@ export const get = query({
 
     // Search within organization
     if (search && organizationId) {
-      return await ctx.db
+      const result = await ctx.db
         .query("documents")
         .withSearchIndex("search_title", (q) =>
           q.search("title", search).eq("organizationId", organizationId),
         )
         .paginate(paginationOpts);
+      return { ...result, page: result.page.map(omitLegacyCollaborationState) };
     }
 
     // Personal search
     if (search) {
-      return await ctx.db
+      const result = await ctx.db
         .query("documents")
         .withSearchIndex("search_title", (q) =>
           q.search("title", search).eq("ownerId", user.subject),
         )
         .paginate(paginationOpts);
+      return { ...result, page: result.page.map(omitLegacyCollaborationState) };
     }
 
     // All docs inside organization
     if (organizationId) {
-      return await ctx.db
+      const result = await ctx.db
         .query("documents")
         .withIndex("by_organization_id", (q) =>
           q.eq("organizationId", organizationId),
         )
         .order("desc")
         .paginate(paginationOpts);
+      return { ...result, page: result.page.map(omitLegacyCollaborationState) };
     }
 
     // All personal docs
-    return await ctx.db
+    const result = await ctx.db
       .query("documents")
       .withIndex("by_owner_id", (q) => q.eq("ownerId", user.subject))
       .order("desc")
       .paginate(paginationOpts);
+    return { ...result, page: result.page.map(omitLegacyCollaborationState) };
   },
 });
 
@@ -97,6 +93,7 @@ export const removeById = mutation({
   handler: async (ctx, args) => {
     await requireDocumentAccess(ctx, args.id);
     await deleteImages(ctx, args.id);
+    await deleteCollaborationState(ctx, args.id);
 
     return await ctx.db.delete(args.id);
   },
@@ -116,6 +113,6 @@ export const getById = query({
   handler: async (ctx, { id }) => {
     const { document } = await requireDocumentAccess(ctx, id);
 
-    return document;
+    return omitLegacyCollaborationState(document);
   },
 });

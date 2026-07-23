@@ -1,9 +1,21 @@
 services:
   app:
-    build: .
+    image: docs-collaborate
     container_name: docs-collaborate
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  collaboration:
+    image: docs-collaborate
+    container_name: docs-collaborate-collaboration
+    command: ["npm", "run", "server"]
+    ports:
+      - "127.0.0.1:4000:4000"
     env_file:
       - .env.production
     environment:

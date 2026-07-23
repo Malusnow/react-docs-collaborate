@@ -13,7 +13,9 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as collaboration from "../collaboration.js";
 import type * as documents from "../documents.js";
+import type * as http from "../http.js";
 import type * as images from "../images.js";
 import type * as lib_documentAccess from "../lib/documentAccess.js";
 
@@ -26,7 +28,9 @@ import type * as lib_documentAccess from "../lib/documentAccess.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  collaboration: typeof collaboration;
   documents: typeof documents;
+  http: typeof http;
   images: typeof images;
   "lib/documentAccess": typeof lib_documentAccess;
 }>;
