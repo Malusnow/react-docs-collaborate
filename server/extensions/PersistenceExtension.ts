@@ -117,9 +117,7 @@ export default class PersistenceExtension implements Extension {
       const ydoc = new Y.Doc();
       Y.applyUpdate(ydoc, new Uint8Array(await response.arrayBuffer()));
 
-      const isLegacyState =
-        response.headers.get("x-collaboration-legacy") === "true";
-      if (initializeLayout(ydoc) || isLegacyState) {
+      if (initializeLayout(ydoc)) {
         await this.storeState(documentId, ydoc);
       }
 

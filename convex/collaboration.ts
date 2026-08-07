@@ -19,7 +19,6 @@ export const loadStateInternal = internalQuery({
 
     return {
       initialContent: document.initialContent ?? null,
-      legacyState: document.collaborationState ?? null,
       state: collaborationState?.state ?? null,
     };
   },
@@ -49,10 +48,6 @@ export const storeStateInternal = internalMutation({
         state,
         updatedAt: Date.now(),
       });
-    }
-
-    if (document.collaborationState !== undefined) {
-      await ctx.db.patch(documentId, { collaborationState: undefined });
     }
   },
 });

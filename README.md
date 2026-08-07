@@ -89,24 +89,12 @@ Open [http://localhost:3000](http://localhost:3000).
 ```text
 convex/                              Metadata, authorization, Yjs state, HTTP Actions, and auth configuration
 server/                              Hocuspocus authentication, persistence, and WebSocket entry point
-scripts/migrate-liveblocks.ts        Optional one-time migration from legacy Liveblocks rooms
 src/app/(home)/                      Workspace, search, templates, and document list
 src/app/documents/[documentId]/      Editor, toolbar, room lifecycle, awareness avatars, and shared margins
 src/components/                      Shared application and UI components
 src/extensions/                      Custom Tiptap extensions
 src/constants/                       Templates and editor limits
 ```
-
-## Legacy Liveblocks migration
-
-The migration is safe by default: it performs a dry run and skips documents that already have a Convex collaboration state. Configure `LIVEBLOCKS_SECRET_KEY` temporarily, then run:
-
-```bash
-npm run migrate:liveblocks
-npm run migrate:liveblocks -- --write
-```
-
-Use `--overwrite` together with `--write` only after reviewing the dry-run output. The script migrates the Yjs binary document and legacy shared margins; comments and notifications are intentionally not migrated.
 
 ## Verification
 

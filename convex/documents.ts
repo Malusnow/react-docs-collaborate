@@ -2,16 +2,9 @@ import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 
 import { mutation, query } from "./_generated/server";
-import { Doc } from "./_generated/dataModel";
 import { deleteCollaborationState } from "./collaboration";
 import { deleteImages } from "./images";
 import { requireDocumentAccess, requireUser } from "./lib/documentAccess";
-
-function omitLegacyCollaborationState(document: Doc<"documents">) {
-  const metadata = { ...document };
-  delete metadata.collaborationState;
-  return metadata;
-}
 
 export const create = mutation({
   args: {
@@ -52,7 +45,7 @@ export const get = query({
           q.search("title", search).eq("organizationId", organizationId),
         )
         .paginate(paginationOpts);
-      return { ...result, page: result.page.map(omitLegacyCollaborationState) };
+      return result;
     }
 
     // Personal search
@@ -63,7 +56,7 @@ export const get = query({
           q.search("title", search).eq("ownerId", user.subject),
         )
         .paginate(paginationOpts);
-      return { ...result, page: result.page.map(omitLegacyCollaborationState) };
+      return result;
     }
 
     // All docs inside organization
@@ -75,7 +68,7 @@ export const get = query({
         )
         .order("desc")
         .paginate(paginationOpts);
-      return { ...result, page: result.page.map(omitLegacyCollaborationState) };
+      return result;
     }
 
     // All personal docs
@@ -84,7 +77,7 @@ export const get = query({
       .withIndex("by_owner_id", (q) => q.eq("ownerId", user.subject))
       .order("desc")
       .paginate(paginationOpts);
-    return { ...result, page: result.page.map(omitLegacyCollaborationState) };
+    return result;
   },
 });
 
@@ -113,6 +106,6 @@ export const getById = query({
   handler: async (ctx, { id }) => {
     const { document } = await requireDocumentAccess(ctx, id);
 
-    return omitLegacyCollaborationState(document);
+    return document;
   },
 });

@@ -8,7 +8,6 @@
     "start": "next start",
     "lint": "next lint",
     "server": "tsx server/index.ts",
-    "migrate:liveblocks": "tsx scripts/migrate-liveblocks.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

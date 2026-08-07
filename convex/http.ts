@@ -72,31 +72,6 @@ http.route({
       });
     }
 
-    if (collaborationData.legacyState) {
-      let state: Uint8Array;
-      try {
-        state = Uint8Array.from(atob(collaborationData.legacyState), (value) =>
-          value.charCodeAt(0),
-        );
-      } catch {
-        return jsonResponse({ error: "Invalid collaboration state" }, 500);
-      }
-
-      return new Response(
-        state.buffer.slice(
-          state.byteOffset,
-          state.byteOffset + state.byteLength,
-        ) as ArrayBuffer,
-        {
-          headers: {
-            "Cache-Control": "no-store",
-            "Content-Type": "application/octet-stream",
-            "x-collaboration-legacy": "true",
-          },
-        },
-      );
-    }
-
     return jsonResponse({ initialContent: collaborationData.initialContent });
   }),
 });

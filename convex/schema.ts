@@ -7,7 +7,6 @@ export default defineSchema({
     initialContent: v.optional(v.string()),
     ownerId: v.string(),
     organizationId: v.optional(v.string()),
-    collaborationState: v.optional(v.string()),
   })
     .index("by_owner_id", ["ownerId"])
     .index("by_organization_id", ["organizationId"])
