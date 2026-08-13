@@ -34,9 +34,7 @@ import {
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import { useEditorStore } from "@/store/useEditorStore";
-import { RemoveDialog } from "@/components/remove-dialog";
-import { RenameDialog } from "@/components/rename-dialog";
-
+import dynamic from "next/dynamic";
 import { DocumentInput } from "./document-input";
 import { UserButton, OrganizationSwitcher } from "@clerk/nextjs";
 import { Doc } from "../../../../convex/_generated/dataModel";
@@ -50,6 +48,20 @@ import { Avatars } from "./avatars";
 interface NavbarProps {
   data: Doc<"documents">;
 }
+
+const RenameDialog = dynamic(
+  () => import("@/components/rename-dialog").then((mod) => mod.RenameDialog),
+  {
+    ssr: false,
+  },
+);
+
+const RemoveDialog = dynamic(
+  () => import("@/components/remove-dialog").then((mod) => mod.RemoveDialog),
+  {
+    ssr: false,
+  },
+);
 
 export const Navbar = ({ data }: NavbarProps) => {
   const documentId = data._id;
@@ -290,17 +302,21 @@ export const Navbar = ({ data }: NavbarProps) => {
                 </MenubarContent>
               </MenubarMenu>
             </Menubar>
-            <RenameDialog
-              documentId={documentId}
-              initialTitle={title}
-              open={isRenameDialogOpen}
-              onOpenChange={setIsRenameDialogOpen}
-            />
-            <RemoveDialog
-              documentId={documentId}
-              open={isRemoveDialogOpen}
-              onOpenChange={setIsRemoveDialogOpen}
-            />
+            {isRenameDialogOpen && (
+              <RenameDialog
+                documentId={documentId}
+                initialTitle={title}
+                open={isRenameDialogOpen}
+                onOpenChange={setIsRenameDialogOpen}
+              />
+            )}
+            {isRemoveDialogOpen && (
+              <RemoveDialog
+                documentId={documentId}
+                open={isRemoveDialogOpen}
+                onOpenChange={setIsRemoveDialogOpen}
+              />
+            )}
           </div>
         </div>
       </div>

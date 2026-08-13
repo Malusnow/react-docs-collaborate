@@ -6,8 +6,6 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { RemoveDialog } from "@/components/remove-dialog";
-import { RenameDialog } from "@/components/rename-dialog";
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -15,8 +13,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-
+import dynamic from "next/dynamic";
 import { Id } from "../../../convex/_generated/dataModel";
+
+const RenameDialog = dynamic(
+  () => import("@/components/rename-dialog").then((mod) => mod.RenameDialog),
+  {
+    ssr: false,
+  },
+);
+
+const RemoveDialog = dynamic(
+  () => import("@/components/remove-dialog").then((mod) => mod.RemoveDialog),
+  {
+    ssr: false,
+  },
+);
 
 interface DocumentMenuProps {
   documentId: Id<"documents">;
@@ -65,17 +77,21 @@ export const DocumentMenu = ({
           Open in a new tab
         </DropdownMenuItem>
       </DropdownMenuContent>
-      <RenameDialog
-        documentId={documentId}
-        initialTitle={title}
-        open={isRenameDialogOpen}
-        onOpenChange={setIsRenameDialogOpen}
-      />
-      <RemoveDialog
-        documentId={documentId}
-        open={isRemoveDialogOpen}
-        onOpenChange={setIsRemoveDialogOpen}
-      />
+      {isRenameDialogOpen && (
+        <RenameDialog
+          documentId={documentId}
+          initialTitle={title}
+          open={isRenameDialogOpen}
+          onOpenChange={setIsRenameDialogOpen}
+        />
+      )}
+      {isRemoveDialogOpen && (
+        <RemoveDialog
+          documentId={documentId}
+          open={isRemoveDialogOpen}
+          onOpenChange={setIsRemoveDialogOpen}
+        />
+      )}
     </DropdownMenu>
   );
 };
